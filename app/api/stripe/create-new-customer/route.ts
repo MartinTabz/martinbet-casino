@@ -1,7 +1,6 @@
 import { getServiceSupabase } from "@/utils/supabase/service";
 import { stripe } from "@/utils/stripe/config";
 import { type NextRequest } from "next/server";
-import axios from "axios";
 
 export async function POST(req: NextRequest) {
 	const searchParams = req.nextUrl.searchParams;

@@ -1,7 +1,12 @@
+import { User } from "@supabase/supabase-js";
 import DiscordSignInButton from "./auth/DiscordSignInButton";
 import UserNav from "./auth/UserNav";
 
-export default function Navigation({ user }: any | null) {
+interface NavigationProps {
+	user: User | null;
+}
+
+export default function Navigation({ user }: NavigationProps) {
 	return (
 		<header className="w-full h-[80px] flex justify-center items-center px-2 border-b">
 			<div className="flex w-full max-w-[1000px] items-center justify-between">
