@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
 
 	await supabase
 		.from("profiles")
-		.update({ stripe_customer: customer.id })
+		.update({ stripe_customer_id: customer.id })
 		.eq("id", record.id);
 
 	return new Response(`Stripe customer created: ${customer.id}`);
