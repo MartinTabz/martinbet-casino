@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navigation from "@/components/Navigation";
 import { createClient } from "@/utils/supabase/server";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -29,12 +30,19 @@ export default async function RootLayout({
 	const { data: user } = await supabase.auth.getUser();
 
 	return (
-		<html lang="cs">
+		<html lang="cs" suppressHydrationWarning>
 			<body
 				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 			>
-				<Navigation user={user.user} />
-				<main>{children}</main>
+				<ThemeProvider
+					attribute="class"
+					defaultTheme="system"
+					enableSystem
+					disableTransitionOnChange
+				>
+					<Navigation user={user.user} />
+					<main>{children}</main>
+				</ThemeProvider>
 			</body>
 		</html>
 	);

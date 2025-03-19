@@ -1,5 +1,5 @@
-import DiscordSignInButton from "./DiscordSignInButton";
-import UserNav from "./UserNav";
+import DiscordSignInButton from "./auth/DiscordSignInButton";
+import UserNav from "./auth/UserNav";
 
 export default function Navigation({ user }: any | null) {
 	return (
