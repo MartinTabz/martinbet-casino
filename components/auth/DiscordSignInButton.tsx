@@ -25,12 +25,12 @@ export default function DiscordSignInButton() {
 		<button
 			disabled={isLoading}
 			onClick={handleSignIn}
-			className="flex items-center gap-3 bg-[#5865F2] text-[#E0E3FF] font-bold px-6 py-3 rounded-full cursor-pointer duration-200 ease-in-out hover:bg-[#4957e7] disabled:hover:bg-[#5865F2] disabled:cursor-not-allowed"
+			className="flex items-center gap-3 bg-[#5865F2] text-[#E0E3FF] font-bold px-5 py-2 rounded-full cursor-pointer text-sm duration-200 ease-in-out hover:bg-[#4957e7] disabled:hover:bg-[#5865F2] disabled:cursor-not-allowed"
 		>
 			{isLoading ? (
-				<FiLoader className="animate-spin text-2xl" />
+				<FiLoader className="animate-spin text-xl" />
 			) : (
-				<FaDiscord className="text-2xl" />
+				<FaDiscord className="text-xl" />
 			)}
 			Přihlásit se přes Discord
 		</button>
