@@ -24,7 +24,18 @@ interface CheckoutSession {
 }
 
 export default function NavBalance({ balance }: { balance: number }) {
-	const formattedBalance = balance.toLocaleString("cs-CZ");
+	const coinBalance = balance / 100;
+	const formattedBalance =
+		balance % 100 === 0
+			? coinBalance.toLocaleString("cs-CZ", {
+					minimumFractionDigits: 0,
+					maximumFractionDigits: 0,
+			  })
+			: coinBalance.toLocaleString("cs-CZ", {
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2,
+			  });
+
 	const stripePromise = loadStripe(
 		process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 	);
@@ -68,10 +79,10 @@ export default function NavBalance({ balance }: { balance: number }) {
 
 	return (
 		<>
-			<div className="flex items-center justify-between h-[40px]">
-				<div className="min-w-32 bg-accent text-accent-foreground h-full rounded-l-md flex gap-2 items-center justify-end p-3">
+			<div className="flex items-center justify-between h-[35px]">
+				<div className="min-w-32 bg-accent text-sm font-bold text-accent-foreground h-full rounded-l-md flex gap-2 items-center justify-end p-2">
 					{formattedBalance}
-					<div className="bg-main border border-main-foreground text-white w-5 text-xs font-bold rounded-full h-5 flex items-center justify-center">
+					<div className="bg-main border border-main-foreground text-white w-4 text-[10px] font-bold rounded-full h-4 flex items-center justify-center">
 						M
 					</div>
 				</div>
