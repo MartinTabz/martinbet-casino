@@ -23,13 +23,7 @@ interface CheckoutSession {
 	client_secret: string | null;
 }
 
-export default function NavBalance({
-	balance,
-	isUser,
-}: {
-	balance: number;
-	isUser: boolean;
-}) {
+export default function NavBalanceMenu({ balance }: { balance: number }) {
 	const coinBalance = balance / 100;
 	const formattedBalance =
 		balance % 100 === 0
@@ -85,13 +79,9 @@ export default function NavBalance({
 
 	return (
 		<>
-			<div className="flex items-center justify-between h-[35px]">
+			<div className="grid grid-cols-4 h-[35px]">
 				<div
-					className={`${
-						isUser
-							? "rounded-md lg:rounded-l-md lg:rounded-r-none"
-							: "rounded-md"
-					} min-w-32 bg-accent text-sm font-bold text-accent-foreground h-full  flex gap-2 items-center justify-end p-2`}
+					className={`rounded-l-md col-span-3 min-w-32 bg-accent text-sm font-bold text-accent-foreground h-full  flex gap-2 items-center justify-end p-2`}
 				>
 					{formattedBalance}
 					<div className="bg-main border border-main-foreground text-white w-4 text-[10px] font-bold rounded-full h-4 flex items-center justify-center">
@@ -100,9 +90,7 @@ export default function NavBalance({
 				</div>
 				<div
 					onClick={() => setIsOpened(true)}
-					className={`${
-						isUser ? "hidden lg:flex" : "hidden"
-					} cursor-pointer rounded-r-md duration-200 text-sm ease-in-out hover:bg-main-foreground bg-main font-black h-full w-auto px-3 items-center justify-center text-white`}
+					className={`flex cursor-pointer rounded-r-md duration-200 text-sm ease-in-out hover:bg-main-foreground bg-main font-black h-full w-auto px-3 items-center justify-center text-white`}
 				>
 					Nabít
 				</div>

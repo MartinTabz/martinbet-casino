@@ -24,7 +24,7 @@ export function ThemeSwitch() {
 					<span className="sr-only">Změnit motiv</span>
 				</Button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent align="end">
+			<DropdownMenuContent align="center">
 				<DropdownMenuItem onClick={() => setTheme("light")}>
 					Světlý
 				</DropdownMenuItem>

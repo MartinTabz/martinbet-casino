@@ -32,7 +32,9 @@ export default function DiscordSignInButton() {
 			) : (
 				<FaDiscord className="text-xl" />
 			)}
-			Přihlásit se přes Discord
+			<div>
+				Přihlásit se <span className="hidden lg:inline-block">přes Discord</span>
+			</div>
 		</button>
 	);
 }
