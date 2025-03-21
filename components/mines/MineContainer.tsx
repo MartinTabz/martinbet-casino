@@ -5,21 +5,52 @@ import { FaBomb, FaDiamond } from "react-icons/fa6";
 import { useState } from "react";
 import { useNotifications } from "@/utils/notification-context";
 import { useBalance } from "@/utils/balance-context";
+import { createNewGame } from "@/app/miny/actions";
+import { FiLoader } from "react-icons/fi";
 
 export default function MineContainer() {
 	const [numberOfMines, setNumberOfMines] = useState<number[]>([17]);
 	const [betAmout, setBetAmount] = useState<string>("");
 
-	const { newSuccess } = useNotifications();
+	const [pendingGame, setPendingGame] = useState<boolean>(false);
+	const [isLoading, setIsLoading] = useState<boolean>(false);
+
+	const { newError } = useNotifications();
 	const { balance, setBalance } = useBalance();
 
 	const handlePlay = async () => {
-		console.log("Min: ");
-		console.log("Částka: ", betAmout);
-		newSuccess(
-			`Počet min je ${24 - numberOfMines[0]} a částka sázky je ${betAmout}`
-		);
-		setBalance(balance - parseInt(betAmout) * 100);
+		if (pendingGame == true) {
+			console.log("Vybrat");
+		} else {
+			const actualNumberOfMines: number = 24 - numberOfMines[0];
+
+			if (actualNumberOfMines < 1 || actualNumberOfMines > 24) {
+				return newError("Počet min musí být celé číslo mezi 1 a 24.");
+			}
+
+			if (!Number.isInteger(parseInt(betAmout)) || parseInt(betAmout) <= 0) {
+				return newError("Vsazená částka musí být kladné celé číslo.");
+			}
+
+			setIsLoading(true);
+
+			const res = await createNewGame(
+				24 - numberOfMines[0],
+				parseInt(betAmout) * 100
+			);
+
+			if (res.error) {
+				newError(res.error);
+			} else if (res.success) {
+				setBalance(balance - parseInt(betAmout) * 100);
+				setPendingGame(true);
+			} else {
+				setIsLoading(false);
+				return newError("Něco se pokazilo! Zkus to později.");
+			}
+		}
+
+		setIsLoading(false);
 	};
 
 	return (
@@ -57,10 +88,17 @@ export default function MineContainer() {
 			<div className="p-4 flex flex-col gap-5 md:col-span-2 md:pt-5 relative w-full">
 				<div className="absolute h-full w-[1px] border-r right-0 top-0"></div>
 				<button
+					disabled={isLoading}
 					onClick={() => handlePlay()}
-					className="bg-green-600 font-bold text-white py-3 w-full border-2 rounded-md border-green-500 md:order-3 md:mt-3 cursor-pointer hover:bg-green-700 duration-200 ease-in-out"
+					className="bg-green-600 disabled:opacity-70 font-bold text-white h-[50px] w-full border-2 rounded-md border-green-500 md:order-3 md:mt-3 cursor-pointer hover:bg-green-700 duration-200 ease-in-out flex items-center justify-center"
 				>
-					Hrát
+					{isLoading ? (
+						<FiLoader className="animate-spin" />
+					) : pendingGame ? (
+						"Vybrat"
+					) : (
+						"Hrát"
+					)}
 				</button>
 				<div className="flex flex-col gap-1">
 					<label className="text-sm font-bold">Výše sázky</label>
