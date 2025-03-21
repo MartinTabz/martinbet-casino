@@ -35,7 +35,7 @@ export default function NavBalance({
 
 	useEffect(() => {
 		setBalance(rawBalance);
-	}, []);
+	}, [rawBalance]);
 
 	const coinBalance = balance / 100;
 	const formattedBalance =

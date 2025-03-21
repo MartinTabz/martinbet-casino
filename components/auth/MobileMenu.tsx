@@ -21,7 +21,6 @@ import { useBalance } from "@/utils/balance-context";
 export default function MobileMenu({
 	imgUrl,
 	username,
-	balance: rawBalance,
 }: {
 	imgUrl: string;
 	username: string;
