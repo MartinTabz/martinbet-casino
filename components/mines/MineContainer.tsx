@@ -3,14 +3,20 @@
 import { Slider } from "@/components/ui/slider";
 import { FaBomb, FaDiamond } from "react-icons/fa6";
 import { useState } from "react";
+import { useNotifications } from "@/utils/notification-context";
 
 export default function MineContainer() {
 	const [numberOfMines, setNumberOfMines] = useState<number[]>([17]);
 	const [betAmout, setBetAmount] = useState<string>("");
 
+	const { newSuccess } = useNotifications();
+
 	const handlePlay = async () => {
-		console.log("Min: ", 24 - numberOfMines[0]);
+		console.log("Min: ");
 		console.log("Částka: ", betAmout);
+		newSuccess(
+			`Počet min je ${24 - numberOfMines[0]} a částka sázky je ${betAmout}`
+		);
 	};
 
 	return (
