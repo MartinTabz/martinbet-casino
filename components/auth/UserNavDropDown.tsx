@@ -11,17 +11,23 @@ import {
 import { FaChevronDown } from "react-icons/fa6";
 import { useState } from "react";
 import { signOut } from "@/app/auth/actions";
+import { useBalance } from "@/utils/balance-context";
 
 export default function UserNavDropDown() {
 	const [isOpened, setIsOpened] = useState<boolean>(false);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
+	const { setBalance, balance } = useBalance();
 
 	const handleLogOut = async () => {
 		setIsLoading(true);
 
+		const defaultBalance: number = balance;
+
+		setBalance(0);
 		const res = await signOut();
 
 		if (res.message) {
+			setBalance(defaultBalance);
 			console.error(res.message);
 			setIsLoading(false);
 		}

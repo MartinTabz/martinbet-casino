@@ -16,24 +16,30 @@ import NavBalanceMenu from "./NavBalanceMenu";
 import { useState } from "react";
 import { FiLoader } from "react-icons/fi";
 import { signOut } from "@/app/auth/actions";
+import { useBalance } from "@/utils/balance-context";
 
 export default function MobileMenu({
 	imgUrl,
 	username,
-	balance,
+	balance: rawBalance,
 }: {
 	imgUrl: string;
 	username: string;
 	balance: number;
 }) {
 	const [isLogginOut, setIsLogginOut] = useState<boolean>(false);
+	const { setBalance, balance } = useBalance();
 
 	const handleSignOut = async () => {
 		setIsLogginOut(true);
 
+		const defaultBalance: number = balance;
+
+		setBalance(0);
 		const res = await signOut();
 
 		if (res.message) {
+			setBalance(defaultBalance);
 			console.error(res.message);
 			setIsLogginOut(false);
 		}

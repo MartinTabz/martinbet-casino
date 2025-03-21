@@ -4,12 +4,14 @@ import { Slider } from "@/components/ui/slider";
 import { FaBomb, FaDiamond } from "react-icons/fa6";
 import { useState } from "react";
 import { useNotifications } from "@/utils/notification-context";
+import { useBalance } from "@/utils/balance-context";
 
 export default function MineContainer() {
 	const [numberOfMines, setNumberOfMines] = useState<number[]>([17]);
 	const [betAmout, setBetAmount] = useState<string>("");
 
 	const { newSuccess } = useNotifications();
+	const { balance, setBalance } = useBalance();
 
 	const handlePlay = async () => {
 		console.log("Min: ");
@@ -17,6 +19,7 @@ export default function MineContainer() {
 		newSuccess(
 			`Počet min je ${24 - numberOfMines[0]} a částka sázky je ${betAmout}`
 		);
+		setBalance(balance - parseInt(betAmout) * 100);
 	};
 
 	return (

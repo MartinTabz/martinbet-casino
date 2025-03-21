@@ -7,12 +7,13 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "../ui/input";
 import { FiLoader } from "react-icons/fi";
 import { usePathname } from "next/navigation";
 import { getEmbeddedCheckout } from "@/app/api/stripe/actions";
 import { loadStripe } from "@stripe/stripe-js";
+import { useBalance } from "@/utils/balance-context";
 import {
 	EmbeddedCheckoutProvider,
 	EmbeddedCheckout,
@@ -24,12 +25,18 @@ interface CheckoutSession {
 }
 
 export default function NavBalance({
-	balance,
+	balance: rawBalance,
 	isUser,
 }: {
 	balance: number;
 	isUser: boolean;
 }) {
+	const { balance, setBalance } = useBalance();
+
+	useEffect(() => {
+		setBalance(rawBalance);
+	}, []);
+
 	const coinBalance = balance / 100;
 	const formattedBalance =
 		balance % 100 === 0

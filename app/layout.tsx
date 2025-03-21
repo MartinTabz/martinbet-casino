@@ -5,6 +5,7 @@ import Navigation from "@/components/Navigation";
 import { createClient } from "@/utils/supabase/server";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import NotificationProvider from "@/utils/notification-context";
+import { BalanceProvider } from "@/utils/balance-context";
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -41,10 +42,12 @@ export default async function RootLayout({
 					enableSystem
 					disableTransitionOnChange
 				>
-					<NotificationProvider>
-						<Navigation user={user.user} />
-						<main>{children}</main>
-					</NotificationProvider>
+					<BalanceProvider>
+						<NotificationProvider>
+							<Navigation user={user.user} />
+							<main>{children}</main>
+						</NotificationProvider>
+					</BalanceProvider>
 				</ThemeProvider>
 			</body>
 		</html>
