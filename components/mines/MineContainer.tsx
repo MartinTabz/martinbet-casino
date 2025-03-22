@@ -8,7 +8,11 @@ import { useBalance } from "@/utils/balance-context";
 import { createNewGame } from "@/app/miny/actions";
 import { FiLoader } from "react-icons/fi";
 
-export default function MineContainer() {
+export default function MineContainer({
+	currentGame,
+}: {
+	currentGame: GameMines | null;
+}) {
 	const [numberOfMines, setNumberOfMines] = useState<number[]>([17]);
 	const [betAmout, setBetAmount] = useState<string>("");
 
