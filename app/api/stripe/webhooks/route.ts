@@ -49,21 +49,27 @@ export async function POST(req: Request) {
 }
 
 async function handleBalanceDeposit(obj: Stripe.Checkout.Session) {
-	console.log(obj);
 	if (!obj.customer) {
-		throw new Error("There is no object in digital product checkout object");
+		throw new Error("There is no customer in the checkout session object");
 	}
+
+	const customerId =
+		typeof obj.customer === "string" ? obj.customer : obj.customer.id;
 
 	const { data: profile } = await supabase
 		.from("profiles")
 		.select("id,balance")
-		.eq("stripe_customer_id", obj.customer)
+		.eq("stripe_customer_id", customerId)
 		.single();
 
 	if (!profile || !profile.id) {
 		throw new Error(
-			`Stripe customer with ID: ${obj.customer} does not have corresponding profile in database`
+			`Stripe customer with ID: ${customerId} does not have a corresponding profile in the database`
 		);
+	}
+
+	if (obj.amount_total === null) {
+		throw new Error("Checkout session does not include a valid amount_total.");
 	}
 
 	const newBalance = profile.balance + obj.amount_total;

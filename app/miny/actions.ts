@@ -124,3 +124,132 @@ export async function createNewGame(numberOfMines: number, betAmout: number) {
 
 	return { error: null, success: true };
 }
+
+export async function revealMine(mineIndex: number) {
+	const supabaseAuth = await createClient();
+
+	const { data: auth, error: authErr } = await supabaseAuth.auth.getUser();
+
+	if (authErr || !auth?.user) {
+		return { error: "Není přihlášený uživatel", info: null };
+	}
+
+	if (mineIndex < 0 || mineIndex > 24) {
+		return { error: "Nebylo vybráno validní políčko", info: null };
+	}
+
+	const { data: currentGame } = await supabaseAuth
+		.from("game_mines")
+		.select("*")
+		.eq("finished", false)
+		.eq("id_profile", auth.user.id)
+		.order("created_at", { ascending: false })
+		.limit(1)
+		.single();
+
+	if (!currentGame) {
+		return { error: "Nemáš rozehranou žádnou hru", info: null };
+	}
+
+	const supabase = getServiceSupabase();
+
+	const { data: gameMinesBoxes } = await supabase
+		.from("game_mines_boxes")
+		.select("*")
+		.eq("id_game", currentGame.id)
+		.eq("id_box", mineIndex)
+		.single();
+
+	if (!gameMinesBoxes) {
+		return { error: "Vybrané políčko neexistuje", info: null };
+	}
+
+	if (gameMinesBoxes.revealed === true) {
+		return { error: "Vybrané políčko již bylo odhaleno", info: null };
+	}
+
+	if (gameMinesBoxes.bomb === true) {
+		const { error: updateGameErr } = await supabase
+			.from("game_mines")
+			.update({ won: false, finished: true })
+			.eq("id", currentGame.id)
+			.select();
+
+		if (updateGameErr) {
+			return { error: "Něco se pokazilo při změně hry", info: null };
+		}
+
+		const { error: updateGameBoxesErr } = await supabase
+			.from("game_mines_boxes")
+			.update({ revealed: true })
+			.eq("id_game", currentGame.id)
+			.select();
+
+		if (updateGameBoxesErr) {
+			return { error: "Něco se pokazilo při změně políček hry", info: null };
+		}
+
+		return { error: null, info: { bomb: true, multiplier: null, won: false } };
+	} else {
+		const { error: updateGameBoxesErr } = await supabase
+			.from("game_mines_boxes")
+			.update({ revealed: true })
+			.eq("id_game", currentGame.id)
+			.eq("id_box", mineIndex)
+			.select();
+
+		if (updateGameBoxesErr) {
+			return { error: "Něco se pokazilo při změně políček hry", info: null };
+		}
+
+		const { data: nonBombBoxes, error: nonBombErr } = await supabase
+			.from("game_mines_boxes")
+			.select("*")
+			.eq("id_game", currentGame.id)
+			.eq("bomb", false);
+
+		if (nonBombErr) {
+			return { error: "Chyba při načítání políček", info: null };
+		}
+
+		const allRevealed = nonBombBoxes?.every((box) => box.revealed === true);
+
+		if (allRevealed) {
+			const { error: updateGameWinErr } = await supabase
+				.from("game_mines")
+				.update({ won: true, finished: true })
+				.eq("id", currentGame.id)
+				.select();
+
+			if (updateGameWinErr) {
+				return {
+					error: "Něco se pokazilo při aktualizaci hry jako vyhrané",
+					info: null,
+				};
+			}
+
+			const { error: revealAllErr } = await supabase
+				.from("game_mines_boxes")
+				.update({ revealed: true })
+				.eq("id_game", currentGame.id)
+				.select();
+
+			if (revealAllErr) {
+				return {
+					error: "Něco se pokazilo při aktualizaci hry jako vyhrané",
+					info: null,
+				};
+			}
+
+			return {
+				error: null,
+				info: { bomb: false, multiplier: "1.3x", won: true },
+			};
+		} else {
+			return {
+				error: null,
+				info: { bomb: false, multiplier: "1.3x", won: false },
+			};
+		}
+	}
+}

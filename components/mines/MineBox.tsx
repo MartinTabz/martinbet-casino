@@ -1,6 +1,6 @@
+// @components/mines/MineBox.tsx
 "use client";
 
-import { FaBomb, FaDiamond } from "react-icons/fa6";
 import Diamond from "@/public/Diamond";
 import Bomb from "@/public/Bomb";
 
@@ -12,11 +12,18 @@ type Mine = {
 
 interface Props {
 	mine: Mine;
+	isLoading: boolean;
+	onReveal: (mineIndex: number) => void;
 }
 
-export default function MineBox({ mine }: Props) {
+export default function MineBox({ mine, isLoading, onReveal }: Props) {
 	return (
 		<div
+			onClick={() => {
+				if (!isLoading && !mine.revealed) {
+					onReveal(mine.index);
+				}
+			}}
 			className={`${
 				!mine.revealed &&
 				"bg-accent border-accent group hover:bottom-[3px] cursor-pointer hover:shadow-lg"
