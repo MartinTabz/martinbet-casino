@@ -37,6 +37,11 @@ export default function MinesGrid({ revealedMines }: Props) {
 		const currentMine = mines.find((m) => m.index === mineIndex);
 		if (!currentMine || currentMine.revealed || isLoading) return;
 
+		const audio = new Audio("/click.wav");
+		audio.play().catch((err) => {
+			console.error("Failed to play audio:", err);
+		});
+
 		setIsLoading(true);
 		const res = await revealMine(mineIndex);
 		if (res.error) {
@@ -56,6 +61,18 @@ export default function MinesGrid({ revealedMines }: Props) {
 					: mine
 			)
 		);
+		if (res.info.bomb) {
+			const audio = new Audio("/bomb.wav");
+			audio.play().catch((err) => {
+				console.error("Failed to play audio:", err);
+			});
+		} else {
+			const audio = new Audio("/diamond.wav");
+			audio.play().catch((err) => {
+				console.error("Failed to play audio:", err);
+			});
+		}
+
 		setIsLoading(false);
 		return res.info;
 	};
