@@ -7,16 +7,21 @@ import { useNotifications } from "@/utils/notification-context";
 import { useBalance } from "@/utils/balance-context";
 import { createNewGame } from "@/app/miny/actions";
 import { FiLoader } from "react-icons/fi";
+import MinesGrid from "./MinesGrid";
 
 export default function MineContainer({
 	currentGame,
+	currentGameRevealedBoxes,
 }: {
 	currentGame: GameMines | null;
+	currentGameRevealedBoxes: GameMinesBoxes[] | []
 }) {
 	const [numberOfMines, setNumberOfMines] = useState<number[]>([17]);
 	const [betAmout, setBetAmount] = useState<string>("");
 
-	const [pendingGame, setPendingGame] = useState<boolean>(false);
+	const [pendingGame, setPendingGame] = useState<boolean>(
+		currentGame == null ? false : true
+	);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 
 	const { newError } = useNotifications();
@@ -60,33 +65,7 @@ export default function MineContainer({
 	return (
 		<div className="w-full max-w-[1000px] h-auto border bg-primary-foreground rounded-xl md:grid md:grid-cols-6">
 			<div className="md:col-span-4 md:order-2">
-				<div className="grid grid-cols-5 gap-1.5 w-full p-4 sm:gap-2.5 lg:p-10">
-					<div className="w-full aspect-square bg-accent rounded-sm"></div>
-					<div className="w-full aspect-square bg-accent rounded-sm"></div>
-					<div className="w-full aspect-square bg-accent rounded-sm"></div>
-					<div className="w-full aspect-square bg-accent rounded-sm"></div>
-					<div className="w-full aspect-square bg-accent rounded-sm"></div>
-					<div className="w-full aspect-square bg-accent rounded-sm"></div>
-					<div className="w-full aspect-square bg-accent rounded-sm"></div>
-					<div className="w-full aspect-square bg-accent rounded-sm"></div>
-					<div className="w-full aspect-square bg-accent rounded-sm"></div>
-					<div className="w-full aspect-square bg-accent rounded-sm"></div>
-					<div className="w-full aspect-square bg-accent rounded-sm"></div>
-					<div className="w-full aspect-square bg-accent rounded-sm"></div>
-					<div className="w-full aspect-square bg-accent rounded-sm"></div>
-					<div className="w-full aspect-square bg-accent rounded-sm"></div>
-					<div className="w-full aspect-square bg-accent rounded-sm"></div>
-					<div className="w-full aspect-square bg-accent rounded-sm"></div>
-					<div className="w-full aspect-square bg-accent rounded-sm"></div>
-					<div className="w-full aspect-square bg-accent rounded-sm"></div>
-					<div className="w-full aspect-square bg-accent rounded-sm"></div>
-					<div className="w-full aspect-square bg-accent rounded-sm"></div>
-					<div className="w-full aspect-square bg-accent rounded-sm"></div>
-					<div className="w-full aspect-square bg-accent rounded-sm"></div>
-					<div className="w-full aspect-square bg-accent rounded-sm"></div>
-					<div className="w-full aspect-square bg-accent rounded-sm"></div>
-					<div className="w-full aspect-square bg-accent rounded-sm"></div>
-				</div>
+				<MinesGrid revealedMines={currentGameRevealedBoxes} />
 			</div>
 			<hr className="block md:hidden" />
 			<div className="p-4 flex flex-col gap-5 md:col-span-2 md:pt-5 relative w-full">
@@ -106,11 +85,16 @@ export default function MineContainer({
 				</button>
 				<div className="flex flex-col gap-1">
 					<label className="text-sm font-bold">Výše sázky</label>
-					<div className="flex items-center gap-3 border p-3 rounded-md bg-accent">
+					<div
+						className={`flex items-center gap-3 border p-3 rounded-md bg-accent ${
+							pendingGame && "opacity-60"
+						}`}
+					>
 						<div className="bg-main border border-main-foreground text-white w-4 text-[10px] font-bold rounded-full h-4 flex items-center justify-center">
 							M
 						</div>
 						<input
+							disabled={pendingGame}
 							value={betAmout}
 							placeholder="0,00"
 							onChange={(e) => setBetAmount(e.target.value)}
@@ -121,13 +105,18 @@ export default function MineContainer({
 				</div>
 				<div className="flex flex-col gap-1">
 					<label className="text-sm font-bold">Počet min</label>
-					<div className="flex items-center gap-3 border p-3 rounded-md bg-accent">
+					<div
+						className={`flex items-center gap-3 border p-3 rounded-md bg-accent ${
+							pendingGame && "opacity-60"
+						}`}
+					>
 						<div className="border bg-blue-900 flex items-center justify-center w-[50px] gap-1 py-1 rounded text-xs font-bold text-white">
 							<FaDiamond />
 							{numberOfMines[0] + 1}
 						</div>
 						<div className="w-[calc(100%-100px)]">
 							<Slider
+								disabled={pendingGame}
 								value={numberOfMines}
 								onValueChange={setNumberOfMines}
 								defaultValue={[17]}

@@ -13,18 +13,27 @@ export default async function MinesPage() {
 
 	const { data: unfinishedGame } = await supabase
 		.from("game_mines")
-		.select(`*,game_mines_boxes("*")`)
+		.select("*")
 		.eq("finished", false)
 		.eq("id_profile", user.user.id)
 		.order("created_at", { ascending: false })
 		.limit(1)
 		.single();
 
-	console.log(unfinishedGame);
+	let currentGameRevealedBoxes: GameMinesBoxes[] | [] = [];
+
+	if (unfinishedGame != null) {
+		const { data: gameMinesBoxes } = await supabase
+			.from("game_mines_boxes")
+			.select("*")
+			.eq("id_game", unfinishedGame.id);
+
+		currentGameRevealedBoxes = gameMinesBoxes ?? [];
+	}
 
 	return (
 		<section className="w-full flex justify-center py-5 px-4 md:py-10 lg:py-20">
-			<MineContainer currentGame={unfinishedGame} />
+			<MineContainer currentGame={unfinishedGame} currentGameRevealedBoxes={currentGameRevealedBoxes} />
 		</section>
 	);
 }
