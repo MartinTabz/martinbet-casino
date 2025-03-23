@@ -77,6 +77,10 @@ export default function MineContainer({
 				return newError("Vsazená částka musí být kladné celé číslo.");
 			}
 
+			if(parseInt(betAmout) > 70000) {
+				return newError("Maximální možná vsaditelná částka je z technických důvodů 70 000 Martinů")
+			}
+
 			setIsLoading(true);
 			const res = await createNewGame(
 				24 - numberOfMines[0],

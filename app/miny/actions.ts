@@ -30,6 +30,14 @@ export async function createNewGame(numberOfMines: number, betAmout: number) {
 		};
 	}
 
+	if (betAmout > 7000000) {
+		return {
+			error:
+				"Maximální možná vsaditelná částka je z technických důvodů 70 000 Martinů",
+			success: false,
+		};
+	}
+
 	const { data: profile, error: profileErr } = await supabaseAuth
 		.from("profiles")
 		.select("balance")
