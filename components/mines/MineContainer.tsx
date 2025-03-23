@@ -34,25 +34,32 @@ export default function MineContainer({
 	);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 
-	const { newError } = useNotifications();
+	const { newError, newSuccess } = useNotifications();
 	const { balance, setBalance } = useBalance();
 
 	const handlePlay = async () => {
-		if (pendingGame == true) {
-			console.log("Vybrat");
+		if (pendingGame === true) {
+			setIsLoading(true);
+			const res = await cashOut();
+			if (res.error) {
+				newError(res.error);
+			} else if (res.success && res.info) {
+				setBalance(res.info.newBalance);
+				newSuccess("Vyhrál jsi");
+				setPendingGame(false);
+			} else {
+				newError("Něco se pokazilo");
+			}
 		} else {
 			const actualNumberOfMines: number = 24 - numberOfMines[0];
-
 			if (actualNumberOfMines < 1 || actualNumberOfMines > 24) {
 				return newError("Počet min musí být celé číslo mezi 1 a 24.");
 			}
-
 			if (!Number.isInteger(parseInt(betAmout)) || parseInt(betAmout) <= 0) {
 				return newError("Vsazená částka musí být kladné celé číslo.");
 			}
 
 			setIsLoading(true);
-
 			const res = await createNewGame(
 				24 - numberOfMines[0],
 				parseInt(betAmout) * 100

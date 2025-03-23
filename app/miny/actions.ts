@@ -253,3 +253,95 @@ export async function revealMine(mineIndex: number) {
 		}
 	}
 }
+
+export async function cashOut() {
+	// 1. Get authenticated user
+	const supabaseAuth = await createClient();
+	const { data: auth, error: authErr } = await supabaseAuth.auth.getUser();
+
+	if (authErr || !auth?.user) {
+		return { error: "Není přihlášený uživatel", info: null };
+	}
+
+	// 2. Get the current (unfinished) game for the user.
+	const { data: currentGame } = await supabaseAuth
+		.from("game_mines")
+		.select("*")
+		.eq("finished", false)
+		.eq("id_profile", auth.user.id)
+		.order("created_at", { ascending: false })
+		.limit(1)
+		.single();
+
+	if (!currentGame) {
+		return { error: "Nemáš rozehranou žádnou hru", info: null };
+	}
+
+	// 3. Use service Supabase to fetch all boxes for the current game.
+	const supabase = getServiceSupabase();
+	const { data: boxes, error: boxesErr } = await supabase
+		.from("game_mines_boxes")
+		.select("*")
+		.eq("id_game", currentGame.id);
+
+	if (boxesErr || !boxes) {
+		return { error: "Chyba při načítání políček hry", info: null };
+	}
+
+	// 4. Count bombs, safe boxes, and revealed safe boxes.
+	const totalBoxes = 25;
+	const bombCount = boxes.filter((box) => box.bomb === true).length;
+	const safeTotal = totalBoxes - bombCount;
+	const revealedSafe = boxes.filter(
+		(box) => box.bomb === false && box.revealed === true
+	).length;
+
+	// 5. Compute multiplier.
+	let multiplier: number;
+	if (revealedSafe <= 0) {
+		multiplier = 1;
+	} else if (revealedSafe >= safeTotal) {
+		multiplier = safeTotal; // cap at safeTotal
+	} else {
+		multiplier = safeTotal / (safeTotal - revealedSafe);
+	}
+
+	// 6. Calculate cash out amount.
+	// Assumes currentGame.bet_amount is in the same unit as profile.balance.
+	const cashOutAmount = (currentGame.bet_amount || 0) * multiplier;
+
+	// 7. Retrieve user's profile.
+	const { data: profile, error: profileErr } = await supabase
+		.from("profiles")
+		.select("balance")
+		.eq("id", auth.user.id)
+		.single();
+
+	if (profileErr || !profile) {
+		return { error: "Chyba při načítání profilu", info: null };
+	}
+
+	// 8. Update user's balance.
+	const newBalance = profile.balance + Math.round(cashOutAmount);
+	const { error: updateErr } = await supabase
+		.from("profiles")
+		.update({ balance: newBalance })
+		.eq("id", auth.user.id);
+
+	if (updateErr) {
+		console.error(updateErr);
+		return { error: "Chyba při aktualizaci zůstatku", info: null };
+	}
+
+	// 9. Mark the game as finished and won.
+	const { error: finishErr } = await supabase
+		.from("game_mines")
+		.update({ finished: true, won: true })
+		.eq("id", currentGame.id);
+
+	if (finishErr) {
+		return { error: "Chyba při uzavírání hry", info: null };
+	}
+
+	return { error: null, success: true, info: { multiplier, newBalance } };
+}
