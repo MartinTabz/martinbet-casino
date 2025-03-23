@@ -212,6 +212,15 @@ export async function revealMine(mineIndex: number) {
 			return { error: "Chyba při načítání políček", info: null };
 		}
 
+		const safeTotal = nonBombBoxes.length;
+		const revealedSafe = nonBombBoxes.filter((box) => box.revealed).length;
+
+		let multiplier = 1;
+		for (let i = 0; i < revealedSafe; i++) {
+			multiplier *= (25 - i) / (safeTotal - i);
+		}
+		const multiplierStr = multiplier.toFixed(2) + "x";
+
 		const allRevealed = nonBombBoxes?.every((box) => box.revealed === true);
 
 		if (allRevealed) {
@@ -269,12 +278,12 @@ export async function revealMine(mineIndex: number) {
 
 			return {
 				error: null,
-				info: { bomb: false, multiplier: "1.3x", won: true, newBalance },
+				info: { bomb: false, multiplier: multiplierStr, won: true, newBalance },
 			};
 		} else {
 			return {
 				error: null,
-				info: { bomb: false, multiplier: "1.3x", won: false },
+				info: { bomb: false, multiplier: multiplierStr, won: false },
 			};
 		}
 	}
@@ -314,22 +323,17 @@ export async function cashOut() {
 		return { error: "Chyba při načítání políček hry", info: null };
 	}
 
-	// 4. Count bombs, safe boxes, and revealed safe boxes.
 	const totalBoxes = 25;
-	const bombCount = boxes.filter((box) => box.bomb === true).length;
+	const bombCount = boxes.filter((box) => box.bomb).length;
 	const safeTotal = totalBoxes - bombCount;
 	const revealedSafe = boxes.filter(
 		(box) => box.bomb === false && box.revealed === true
 	).length;
 
-	// 5. Compute multiplier.
-	let multiplier: number;
-	if (revealedSafe <= 0) {
-		multiplier = 1;
-	} else if (revealedSafe >= safeTotal) {
-		multiplier = safeTotal; // cap at safeTotal
-	} else {
-		multiplier = safeTotal / (safeTotal - revealedSafe);
+	// Calculate multiplier using inverse probability product
+	let multiplier = 1;
+	for (let i = 0; i < revealedSafe; i++) {
+		multiplier *= (25 - i) / (safeTotal - i);
 	}
 
 	// 6. Calculate cash out amount.

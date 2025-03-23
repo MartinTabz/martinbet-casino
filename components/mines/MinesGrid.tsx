@@ -11,6 +11,7 @@ type Mine = {
 	index: number;
 	bomb: boolean;
 	revealed: boolean;
+	multiplier: string | null;
 };
 
 interface Props {
@@ -38,6 +39,7 @@ export default function MinesGrid({
 				index,
 				bomb: revealedEntry ? revealedEntry.bomb : false,
 				revealed: revealedEntry ? revealedEntry.revealed : false,
+				multiplier: null,
 			};
 		});
 		setMines(initialMines);
@@ -67,7 +69,12 @@ export default function MinesGrid({
 		setMines((prevMines) =>
 			prevMines.map((mine) =>
 				mine.index === mineIndex
-					? { ...mine, revealed: true, bomb: res.info.bomb }
+					? {
+							...mine,
+							revealed: true,
+							bomb: res.info.bomb,
+							multiplier: res.info.multiplier,
+					  }
 					: mine
 			)
 		);

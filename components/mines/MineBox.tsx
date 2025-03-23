@@ -8,6 +8,7 @@ type Mine = {
 	index: number;
 	bomb: boolean;
 	revealed: boolean;
+	multiplier: string | null;
 };
 
 interface Props {
@@ -45,7 +46,14 @@ export default function MineBox({
 							<Bomb />
 						</div>
 					) : (
-						<Diamond />
+						<div>
+							<Diamond />
+							{mine.multiplier && (
+								<div className="absolute left-1/2 -translate-x-1/2 bg-sky-600 border-sky-800 border-2 rounded-md font-bold px-3 text-sm bottom-[-5px]">
+									{mine.multiplier}
+								</div>
+							)}
+						</div>
 					)}
 				</>
 			)}
