@@ -224,10 +224,14 @@ export async function revealMine(mineIndex: number) {
 		const allRevealed = nonBombBoxes?.every((box) => box.revealed === true);
 
 		if (allRevealed) {
+			const multiplier = 25;
+			const betAmount = currentGame.bet_amount || 0;
+			const winAmount = Math.round(betAmount * multiplier);
+
 			// All safe boxes are revealed: update game as won.
 			const { error: updateGameWinErr } = await supabase
 				.from("game_mines")
-				.update({ won: true, finished: true })
+				.update({ won: true, finished: true, win_multiplier: multiplier })
 				.eq("id", currentGame.id)
 				.select();
 
@@ -251,10 +255,6 @@ export async function revealMine(mineIndex: number) {
 					info: null,
 				};
 			}
-
-			const multiplier = 25;
-			const betAmount = currentGame.bet_amount || 0;
-			const winAmount = Math.round(betAmount * multiplier);
 
 			const { data: profileData, error: profileErr } = await supabase
 				.from("profiles")
@@ -372,7 +372,7 @@ export async function cashOut() {
 	// 9. Mark the game as finished and won.
 	const { error: finishErr } = await supabase
 		.from("game_mines")
-		.update({ finished: true, won: true })
+		.update({ finished: true, won: true, win_multiplier: multiplier })
 		.eq("id", currentGame.id);
 
 	if (finishErr) {

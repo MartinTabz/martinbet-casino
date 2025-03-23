@@ -16,6 +16,7 @@ export type Database = {
 					finished: boolean;
 					id: string;
 					id_profile: string;
+					win_multiplier: number | null;
 					won: boolean | null;
 				};
 				Insert: {
@@ -24,6 +25,7 @@ export type Database = {
 					finished?: boolean;
 					id?: string;
 					id_profile?: string;
+					win_multiplier?: number | null;
 					won?: boolean | null;
 				};
 				Update: {
@@ -32,6 +34,7 @@ export type Database = {
 					finished?: boolean;
 					id?: string;
 					id_profile?: string;
+					win_multiplier?: number | null;
 					won?: boolean | null;
 				};
 				Relationships: [
