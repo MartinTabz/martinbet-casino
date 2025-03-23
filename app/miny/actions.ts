@@ -215,6 +215,7 @@ export async function revealMine(mineIndex: number) {
 		const allRevealed = nonBombBoxes?.every((box) => box.revealed === true);
 
 		if (allRevealed) {
+			// All safe boxes are revealed: update game as won.
 			const { error: updateGameWinErr } = await supabase
 				.from("game_mines")
 				.update({ won: true, finished: true })
@@ -228,6 +229,7 @@ export async function revealMine(mineIndex: number) {
 				};
 			}
 
+			// Reveal all boxes.
 			const { error: revealAllErr } = await supabase
 				.from("game_mines_boxes")
 				.update({ revealed: true })
@@ -241,9 +243,33 @@ export async function revealMine(mineIndex: number) {
 				};
 			}
 
+			const multiplier = 25;
+			const betAmount = currentGame.bet_amount || 0;
+			const winAmount = Math.round(betAmount * multiplier);
+
+			const { data: profileData, error: profileErr } = await supabase
+				.from("profiles")
+				.select("balance")
+				.eq("id", currentGame.id_profile)
+				.single();
+
+			if (profileErr || !profileData) {
+				return { error: "Chyba při načítání profilu", info: null };
+			}
+
+			const newBalance = profileData.balance + winAmount;
+			const { error: updateProfileErr } = await supabase
+				.from("profiles")
+				.update({ balance: newBalance })
+				.eq("id", currentGame.id_profile);
+
+			if (updateProfileErr) {
+				return { error: "Chyba při aktualizaci zůstatku", info: null };
+			}
+
 			return {
 				error: null,
-				info: { bomb: false, multiplier: "1.3x", won: true },
+				info: { bomb: false, multiplier: "1.3x", won: true, newBalance },
 			};
 		} else {
 			return {

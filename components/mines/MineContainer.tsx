@@ -1,3 +1,4 @@
+// @/components/mines/MineContainer.tsx
 "use client";
 
 import { Slider } from "@/components/ui/slider";
@@ -5,16 +6,18 @@ import { FaBomb, FaDiamond } from "react-icons/fa6";
 import { useState } from "react";
 import { useNotifications } from "@/utils/notification-context";
 import { useBalance } from "@/utils/balance-context";
-import { createNewGame } from "@/app/miny/actions";
+import { cashOut, createNewGame } from "@/app/miny/actions";
 import { FiLoader } from "react-icons/fi";
 import MinesGrid from "./MinesGrid";
 
 export default function MineContainer({
 	currentGame,
 	currentGameRevealedBoxes,
+	currentGameMineCount,
 }: {
 	currentGame: GameMines | null;
-	currentGameRevealedBoxes: GameMinesBoxes[] | []
+	currentGameRevealedBoxes: GameMinesBoxes[] | [];
+	currentGameMineCount: number;
 }) {
 	const [numberOfMines, setNumberOfMines] = useState<number[]>([
 		24 - currentGameMineCount,
@@ -33,6 +36,7 @@ export default function MineContainer({
 		currentGame == null ? false : true
 	);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
+	const [gridResetKey, setGridResetKey] = useState<number>(0);
 
 	const { newError, newSuccess } = useNotifications();
 	const { balance, setBalance } = useBalance();
@@ -70,6 +74,7 @@ export default function MineContainer({
 			} else if (res.success) {
 				setBalance(balance - parseInt(betAmout) * 100);
 				setPendingGame(true);
+				setGridResetKey((prev) => prev + 1);
 			} else {
 				setIsLoading(false);
 				return newError("Něco se pokazilo! Zkus to později.");

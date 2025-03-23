@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import MineBox from "./MineBox";
 import { revealMine } from "@/app/miny/actions";
 import { useNotifications } from "@/utils/notification-context";
+import { useBalance } from "@/utils/balance-context";
 
 type Mine = {
 	index: number;
@@ -14,12 +15,21 @@ type Mine = {
 
 interface Props {
 	revealedMines: GameMinesBoxes[] | [];
+	resetKey: number;
+	setPendingGame: (pendingGame: boolean) => void;
+	pendingGame: boolean;
 }
 
-export default function MinesGrid({ revealedMines }: Props) {
+export default function MinesGrid({
+	revealedMines,
+	resetKey,
+	setPendingGame,
+	pendingGame,
+}: Props) {
 	const [mines, setMines] = useState<Mine[]>([]);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
-	const { newError } = useNotifications();
+	const { newError, newSuccess } = useNotifications();
+	const { balance, setBalance } = useBalance();
 
 	useEffect(() => {
 		const initialMines: Mine[] = Array.from({ length: 25 }, (_, index) => {
@@ -31,7 +41,7 @@ export default function MinesGrid({ revealedMines }: Props) {
 			};
 		});
 		setMines(initialMines);
-	}, [revealedMines]);
+	}, [revealedMines, resetKey]);
 
 	const handleRevealMine = async (mineIndex: number) => {
 		const currentMine = mines.find((m) => m.index === mineIndex);
@@ -62,6 +72,7 @@ export default function MinesGrid({ revealedMines }: Props) {
 			)
 		);
 		if (res.info.bomb) {
+			setPendingGame(false);
 			const audio = new Audio("/bomb.wav");
 			audio.play().catch((err) => {
 				console.error("Failed to play audio:", err);
@@ -71,6 +82,12 @@ export default function MinesGrid({ revealedMines }: Props) {
 			audio.play().catch((err) => {
 				console.error("Failed to play audio:", err);
 			});
+			console.log(res);
+			if (res.info.won == true) {
+				setPendingGame(false);
+				newSuccess("Vyhrál jsi");
+				setBalance(res.info.newBalance ? res.info.newBalance : 0);
+			}
 		}
 
 		setIsLoading(false);
@@ -85,6 +102,7 @@ export default function MinesGrid({ revealedMines }: Props) {
 					mine={mine}
 					isLoading={isLoading}
 					onReveal={handleRevealMine}
+					pendingGame={pendingGame}
 				/>
 			))}
 		</div>
