@@ -1,6 +1,7 @@
 import MineContainer from "@/components/mines/MineContainer";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import { getServiceSupabase } from "@/utils/supabase/service";
 
 export default async function MinesPage() {
 	const supabase = await createClient();
@@ -21,6 +22,7 @@ export default async function MinesPage() {
 		.single();
 
 	let currentGameRevealedBoxes: GameMinesBoxes[] | [] = [];
+	let numberOfMines: number = 7;
 
 	if (unfinishedGame != null) {
 		const { data: gameMinesBoxes } = await supabase
@@ -29,11 +31,25 @@ export default async function MinesPage() {
 			.eq("id_game", unfinishedGame.id);
 
 		currentGameRevealedBoxes = gameMinesBoxes ?? [];
+
+		const supabaseService = getServiceSupabase();
+
+		const { count } = await supabaseService
+			.from("game_mines_boxes")
+			.select("*", { count: "exact", head: true })
+			.eq("id_game", unfinishedGame.id)
+			.eq("bomb", true);
+
+		numberOfMines = count ? count : 7;
 	}
 
 	return (
 		<section className="w-full flex justify-center py-5 px-4 md:py-10 lg:py-20">
-			<MineContainer currentGame={unfinishedGame} currentGameRevealedBoxes={currentGameRevealedBoxes} />
+			<MineContainer
+				currentGame={unfinishedGame}
+				currentGameRevealedBoxes={currentGameRevealedBoxes}
+				currentGameMineCount={numberOfMines}
+			/>
 		</section>
 	);
 }

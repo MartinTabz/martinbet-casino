@@ -16,8 +16,18 @@ export default function MineContainer({
 	currentGame: GameMines | null;
 	currentGameRevealedBoxes: GameMinesBoxes[] | []
 }) {
-	const [numberOfMines, setNumberOfMines] = useState<number[]>([17]);
-	const [betAmout, setBetAmount] = useState<string>("");
+	const [numberOfMines, setNumberOfMines] = useState<number[]>([
+		24 - currentGameMineCount,
+	]);
+	const [betAmout, setBetAmount] = useState<string>(
+		currentGame
+			? String(
+					currentGame.bet_amount
+						? currentGame.bet_amount / 100
+						: currentGame.bet_amount
+			  )
+			: ""
+	);
 
 	const [pendingGame, setPendingGame] = useState<boolean>(
 		currentGame == null ? false : true
@@ -65,7 +75,12 @@ export default function MineContainer({
 	return (
 		<div className="w-full max-w-[1000px] h-auto border bg-primary-foreground rounded-xl md:grid md:grid-cols-6">
 			<div className="md:col-span-4 md:order-2">
-				<MinesGrid revealedMines={currentGameRevealedBoxes} />
+				<MinesGrid
+					revealedMines={currentGameRevealedBoxes}
+					resetKey={gridResetKey}
+					setPendingGame={setPendingGame}
+					pendingGame={pendingGame}
+				/>
 			</div>
 			<hr className="block md:hidden" />
 			<div className="p-4 flex flex-col gap-5 md:col-span-2 md:pt-5 relative w-full">
