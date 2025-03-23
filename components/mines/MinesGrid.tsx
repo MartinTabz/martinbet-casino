@@ -6,6 +6,12 @@ import MineBox from "./MineBox";
 import { revealMine } from "@/app/miny/actions";
 import { useNotifications } from "@/utils/notification-context";
 import { useBalance } from "@/utils/balance-context";
+import WinInfoBox from "./WinInfoBox";
+
+type WinInfo = {
+	multiplier: string;
+	winAmount: number;
+};
 
 type Mine = {
 	index: number;
@@ -19,6 +25,8 @@ interface Props {
 	resetKey: number;
 	setPendingGame: (pendingGame: boolean) => void;
 	pendingGame: boolean;
+	winInfo: WinInfo | null;
+	setWinInfo: (winInfo: WinInfo) => void;
 }
 
 export default function MinesGrid({
@@ -26,11 +34,13 @@ export default function MinesGrid({
 	resetKey,
 	setPendingGame,
 	pendingGame,
+	winInfo,
+	setWinInfo,
 }: Props) {
 	const [mines, setMines] = useState<Mine[]>([]);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
-	const { newError, newSuccess } = useNotifications();
-	const { balance, setBalance } = useBalance();
+	const { newError } = useNotifications();
+	const { setBalance } = useBalance();
 
 	useEffect(() => {
 		const initialMines: Mine[] = Array.from({ length: 25 }, (_, index) => {
@@ -92,8 +102,15 @@ export default function MinesGrid({
 			console.log(res);
 			if (res.info.won == true) {
 				setPendingGame(false);
-				newSuccess("Vyhrál jsi");
+				setWinInfo({
+					multiplier: res.info.multiplier ?? "",
+					winAmount: res.info.winAmount ?? 0,
+				});
 				setBalance(res.info.newBalance ? res.info.newBalance : 0);
+				const audio = new Audio("/win.wav");
+				audio.play().catch((err) => {
+					console.error("Failed to play audio:", err);
+				});
 			}
 		}
 
@@ -102,7 +119,7 @@ export default function MinesGrid({
 	};
 
 	return (
-		<div className="grid grid-cols-5 gap-1.5 w-full p-4 sm:gap-2.5 lg:p-10">
+		<div className="grid grid-cols-5 gap-1.5 w-full p-4 sm:gap-2.5 lg:p-10 relative">
 			{mines.map((mine) => (
 				<MineBox
 					key={mine.index}
@@ -112,6 +129,12 @@ export default function MinesGrid({
 					pendingGame={pendingGame}
 				/>
 			))}
+			{winInfo && (
+				<WinInfoBox
+					multiplier={winInfo.multiplier}
+					winAmount={winInfo.winAmount}
+				/>
+			)}
 		</div>
 	);
 }

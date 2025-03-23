@@ -10,6 +10,11 @@ import { cashOut, createNewGame } from "@/app/miny/actions";
 import { FiLoader } from "react-icons/fi";
 import MinesGrid from "./MinesGrid";
 
+type WinInfo = {
+	multiplier: string;
+	winAmount: number;
+};
+
 export default function MineContainer({
 	currentGame,
 	currentGameRevealedBoxes,
@@ -32,13 +37,15 @@ export default function MineContainer({
 			: ""
 	);
 
+	const [winInfo, setWinInfo] = useState<WinInfo | null>(null);
+
 	const [pendingGame, setPendingGame] = useState<boolean>(
 		currentGame == null ? false : true
 	);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const [gridResetKey, setGridResetKey] = useState<number>(0);
 
-	const { newError, newSuccess } = useNotifications();
+	const { newError } = useNotifications();
 	const { balance, setBalance } = useBalance();
 
 	const handlePlay = async () => {
@@ -49,7 +56,14 @@ export default function MineContainer({
 				newError(res.error);
 			} else if (res.success && res.info) {
 				setBalance(res.info.newBalance);
-				newSuccess("Vyhrál jsi");
+				setWinInfo({
+					multiplier: res.info.multiplier ?? "",
+					winAmount: res.info.winAmout ?? 0,
+				});
+				const audio = new Audio("/win.wav");
+				audio.play().catch((err) => {
+					console.error("Failed to play audio:", err);
+				});
 				setPendingGame(false);
 			} else {
 				newError("Něco se pokazilo");
@@ -75,6 +89,7 @@ export default function MineContainer({
 				setBalance(balance - parseInt(betAmout) * 100);
 				setPendingGame(true);
 				setGridResetKey((prev) => prev + 1);
+				setWinInfo(null);
 			} else {
 				setIsLoading(false);
 				return newError("Něco se pokazilo! Zkus to později.");
@@ -92,6 +107,8 @@ export default function MineContainer({
 					resetKey={gridResetKey}
 					setPendingGame={setPendingGame}
 					pendingGame={pendingGame}
+					winInfo={winInfo}
+					setWinInfo={setWinInfo}
 				/>
 			</div>
 			<hr className="block md:hidden" />

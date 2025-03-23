@@ -278,7 +278,13 @@ export async function revealMine(mineIndex: number) {
 
 			return {
 				error: null,
-				info: { bomb: false, multiplier: multiplierStr, won: true, newBalance },
+				info: {
+					bomb: false,
+					multiplier: multiplierStr,
+					won: true,
+					newBalance,
+					winAmount: winAmount / 100,
+				},
 			};
 		} else {
 			return {
@@ -373,5 +379,13 @@ export async function cashOut() {
 		return { error: "Chyba při uzavírání hry", info: null };
 	}
 
-	return { error: null, success: true, info: { multiplier, newBalance } };
+	return {
+		error: null,
+		success: true,
+		info: {
+			multiplier: multiplier.toFixed(2) + "x",
+			newBalance,
+			winAmout: cashOutAmount / 100,
+		},
+	};
 }
